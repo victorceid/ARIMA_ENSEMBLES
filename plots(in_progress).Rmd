@@ -1,0 +1,35 @@
+
+
+```{r chunky9, echo=TRUE, message=FALSE}
+print(paste0("Mean WIS ", mean(my_forecast_scores[,"wis"]$wis) ) )
+
+#Individual model gof' stats
+all_gofs<- list()
+for(j in 1:NROW(my_preds_list[[1]][[3]][[1]]) ){
+  for(i in 1:NROW(my_preds_list) ){
+    list_all_gofs[[i]]<- my_preds_list[[i]][[3]][[1]][[j]]#I think the very last[[1]] is for the state
+  }
+  all_gofs[[j]]<- Reduce(function(x, y) merge(x, y, all=TRUE), list_all_gofs)
+}
+
+new_df<-data.frame("Date"=all_gofs[[1]]$Date)
+loglik_df<-data.frame("Date"=all_gofs[[1]]$Date)
+r2_df<-data.frame("Date"=all_gofs[[1]]$Date)
+for(i in 1:NROW(all_gofs)){
+  column_name<- toString(paste0("AIC",toString(i)))
+  new_df[column_name]<-all_gofs[[i]]$AIC
+  loglik_df[toString(paste0("loglik",toString(i)))]<-all_gofs[[i]]$loglik
+  r2_df[toString(paste0("r2",toString(i)))]<-all_gofs[[i]]$R2
+}
+
+```
+Boxplots for goodness of fit statistics for each individual model in the ensemble 
+```{r chunky10, echo=TRUE, message=FALSE}
+
+boxplot(new_df[,names(new_df)[-1]], outline = TRUE,xlab="AIC",notch = TRUE)
+boxplot(loglik_df[,names(loglik_df)[-1]], outline = TRUE,xlab="loglik",notch = TRUE)
+boxplot(r2_df[,names(r2_df)[-1]], outline = TRUE,xlab="R2",notch = TRUE)
+
+
+
+```
